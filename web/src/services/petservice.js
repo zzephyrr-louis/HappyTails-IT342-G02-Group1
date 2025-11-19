@@ -78,5 +78,61 @@ export const petService = {
     }
   },
 
+  /**
+   * Search and filter pets
+   * Corresponds to GET /api/pets/search
+   * @param {Object} filters - Object containing filter parameters
+   * @returns {Promise<Array>} Array of filtered pets
+   */
+  searchPets: async (filters = {}) => {
+    try {
+      // Build query parameters from filters object
+      const params = new URLSearchParams();
+      
+      if (filters.species) params.append('species', filters.species);
+      if (filters.gender) params.append('gender', filters.gender);
+      if (filters.breed) params.append('breed', filters.breed);
+      if (filters.size) params.append('size', filters.size);
+      if (filters.temperament) params.append('temperament', filters.temperament);
+      if (filters.shelterLocation) params.append('shelterLocation', filters.shelterLocation);
+      if (filters.minAge) params.append('minAge', filters.minAge);
+      if (filters.maxAge) params.append('maxAge', filters.maxAge);
+
+      const response = await api.get(`/pets/search?${params.toString()}`);
+      const raw = response.data || [];
+      
+      return raw.map((p) => {
+        let imageUrl = '';
+        try {
+          if (p.photosJson) {
+            const arr = typeof p.photosJson === 'string' ? JSON.parse(p.photosJson) : p.photosJson;
+            if (Array.isArray(arr) && arr.length > 0) imageUrl = arr[0];
+          }
+        } catch (e) {
+          imageUrl = '';
+        }
+
+        const tags = p.temperament ? String(p.temperament).split(',').map(t => t.trim()).filter(Boolean) : [];
+
+        return {
+          id: p.petId ?? p.id,
+          name: p.name,
+          breed: p.breed,
+          age: p.age,
+          size: p.size ? String(p.size).toLowerCase() : '',
+          species: p.species,
+          gender: p.gender,
+          temperament: p.temperament,
+          imageUrl,
+          tags,
+          raw: p,
+        }
+      });
+    } catch (error) {
+      console.error('Error searching pets:', error);
+      throw error;
+    }
+  },
+
   // We will add createPet, updatePet, etc. here later
 };

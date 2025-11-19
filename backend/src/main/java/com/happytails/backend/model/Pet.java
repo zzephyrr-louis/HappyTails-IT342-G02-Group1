@@ -53,6 +53,10 @@ public class Pet {
     @Column(name = "temperament", length = 255)
     private String temperament;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", length = 10)
+    private PetGender gender;
+
     @Column(name = "photos_json", columnDefinition = "json")
     private String photosJson;
 
@@ -67,5 +71,9 @@ public class Pet {
 
     public enum PetSize {
         Small, Medium, Large
+    }
+
+    public enum PetGender {
+        Male, Female
     }
 }

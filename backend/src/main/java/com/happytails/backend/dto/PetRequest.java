@@ -8,6 +8,8 @@ public class PetRequest {
     private String size;
     private String gender;
     private String description;
+    private String temperament;
+    private String photosJson;
 
     // --- Manual Getters and Setters ---
 
@@ -31,4 +33,10 @@ public class PetRequest {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getTemperament() { return temperament; }
+    public void setTemperament(String temperament) { this.temperament = temperament; }
+
+    public String getPhotosJson() { return photosJson; }
+    public void setPhotosJson(String photosJson) { this.photosJson = photosJson; }
 }
