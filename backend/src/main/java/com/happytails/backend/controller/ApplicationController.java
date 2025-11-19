@@ -51,10 +51,12 @@ public class ApplicationController {
         if (email == null) return ResponseEntity.status(401).build();
         Optional<ShelterStaff> sOpt = shelterStaffRepository.findByEmail(email);
         if (sOpt.isEmpty()) return ResponseEntity.status(403).body("Not shelter staff or shelter not found");
+        
         Long shelterId = sOpt.get().getShelter().getShelterId();
         return ResponseEntity.ok(applicationService.getApplicationsForShelter(shelterId));
     }
 
+    // --- FIX: Removed "/submit" to match Mobile App ---
     @PostMapping
     public ResponseEntity<?> submitApplication(@Valid @RequestBody ApplicationRequest req) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -73,7 +75,11 @@ public class ApplicationController {
     public ResponseEntity<?> updateStatus(@PathVariable Long id, @Valid @RequestBody StatusUpdateRequest statusReq) {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) return ResponseEntity.status(401).build();
-        boolean isStaff = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(a -> a.equals("ROLE_STAFF"));
+
+        boolean isStaff = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_STAFF"));
+
         if (!isStaff) return ResponseEntity.status(403).body("Only shelter staff can change application status");
 
         try {
