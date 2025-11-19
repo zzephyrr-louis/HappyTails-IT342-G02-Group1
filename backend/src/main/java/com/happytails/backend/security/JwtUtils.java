@@ -1,77 +1,54 @@
 package com.happytails.backend.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtils {
 
-    @Value("${app.jwtSecret}")
-    private String jwtSecret;
+    private final String jwtSecret = "BzTqLiYjD74ipte3GXBnS1i8t9amcRpr2mAlDQowmWb/pKBRlg2bv+eZDL5rsbghfH13e88hiKnmPtCUky6htA==";
+    private final int jwtExpirationMs = 86400000; // 24 hours
 
-    @Value("${app.jwtExpirationMs}")
-    private int jwtExpirationMs;
-
-    private Key getSigningKey() {
-        // Support either a raw secret string or a Base64-encoded secret.
-        // Try to decode as Base64 first (this lets you store a compact base64 key in APP_JWT_SECRET).
-        try {
-            byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(jwtSecret);
-            return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException ex) {
-            // Not a valid Base64 string — fall back to using UTF-8 bytes of the provided secret.
-            return Keys.hmacShaKeyFor(jwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        }
+    // Generate Token
+    public String generateJwtToken(String email, List<String> roles) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("roles", roles)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public String generateJwtToken(String username, java.util.List<String> roles) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpirationMs);
-
-        io.jsonwebtoken.JwtBuilder builder = Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512);
-
-        if (roles != null && !roles.isEmpty()) {
-            builder.claim("roles", roles);
-        }
-
-        return builder.compact();
-    }
-
+    // Get Username from Token
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
+        return Jwts.parserBuilder().setSigningKey(key()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }
 
-    @SuppressWarnings("unchecked")
-    public java.util.List<String> getRolesFromJwtToken(String token) {
-        try {
-            io.jsonwebtoken.Claims claims = Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
-                    .parseClaimsJws(token).getBody();
-            Object rolesObj = claims.get("roles");
-            if (rolesObj instanceof java.util.List) {
-                return (java.util.List<String>) rolesObj;
-            }
-        } catch (JwtException | IllegalArgumentException e) {
-            // ignore and return empty
-        }
-        return java.util.Collections.emptyList();
+    // --- NEW: Get Roles from Token (This was missing!) ---
+    public List<String> getRolesFromJwtToken(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(token).getBody();
+        return claims.get("roles", List.class);
     }
 
+    // Validate Token
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+        } catch (JwtException e) {
+            System.err.println("Invalid JWT token: " + e.getMessage());
         }
+        return false;
+    }
+
+    private Key key() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 }
