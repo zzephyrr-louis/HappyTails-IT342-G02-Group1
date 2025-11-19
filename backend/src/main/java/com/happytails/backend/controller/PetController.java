@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pets")
@@ -35,15 +36,9 @@ public class PetController {
         return pet.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    // --- THIS WAS MISSING ---
+    // FR-6: Create Pet
     @PostMapping
     public ResponseEntity<?> createPet(@RequestBody PetRequest petRequest) {
-        // --- DEBUG PRINT ---
-        System.out.println("DEBUG: Received Pet Request!");
-        System.out.println("DEBUG: Name: " + petRequest.getName());
-        System.out.println("DEBUG: Desc: " + petRequest.getDescription());
-        // -------------------
-
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<ShelterStaff> staffOpt = shelterStaffRepository.findByEmail(email);
 
@@ -53,5 +48,64 @@ public class PetController {
 
         Pet newPet = petService.createPet(petRequest, staffOpt.get().getShelter());
         return ResponseEntity.ok(newPet);
+    }
+
+    // FR-7: Update Pet Profile
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePet(@PathVariable Long id, @RequestBody PetRequest petRequest) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<ShelterStaff> staffOpt = shelterStaffRepository.findByEmail(email);
+
+        if (staffOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only Shelter Staff can update pets.");
+        }
+
+        try {
+            Pet updatedPet = petService.updatePet(id, petRequest, staffOpt.get().getShelter());
+            return ResponseEntity.ok(updatedPet);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // FR-8: Change Pet Status
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> updatePetStatus(@PathVariable Long id, @RequestBody Map<String, String> statusRequest) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<ShelterStaff> staffOpt = shelterStaffRepository.findByEmail(email);
+
+        if (staffOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only Shelter Staff can update pet status.");
+        }
+
+        try {
+            String statusStr = statusRequest.get("status");
+            if (statusStr == null) {
+                return ResponseEntity.badRequest().body("Status is required");
+            }
+            Pet.PetStatus newStatus = Pet.PetStatus.valueOf(statusStr);
+            Pet updatedPet = petService.updatePetStatus(id, newStatus, staffOpt.get().getShelter());
+            return ResponseEntity.ok(updatedPet);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid status: " + e.getMessage());
+        }
+    }
+
+    // FR-9, FR-10, FR-11: Search and Filter Pets
+    @GetMapping("/search")
+    public ResponseEntity<List<Pet>> searchPets(
+            @RequestParam(required = false) String species,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String breed,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) String temperament,
+            @RequestParam(required = false) String shelterLocation,
+            @RequestParam(required = false) Integer minAge,
+            @RequestParam(required = false) Integer maxAge
+    ) {
+        List<Pet> filteredPets = petService.searchPets(
+                species, gender, breed, size, temperament, shelterLocation, minAge, maxAge
+        );
+        return ResponseEntity.ok(filteredPets);
     }
 }

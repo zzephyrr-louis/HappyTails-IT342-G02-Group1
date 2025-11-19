@@ -1,0 +1,467 @@
+{
+  "info": {
+    "name": "HappyTails API",
+    "description": "Complete API collection for HappyTails Pet Adoption Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register Adopter (FR-1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newadopter@test.com\",\n  \"password\": \"Test123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-adopter",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register-adopter"]
+            }
+          }
+        },
+        {
+          "name": "Register Shelter Staff (FR-4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newstaff@shelter.com\",\n  \"password\": \"Staff123!\",\n  \"shelterId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-staff",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register-staff"]
+            }
+          }
+        },
+        {
+          "name": "Login Adopter (FR-2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "    console.log(\"Token saved: \" + jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@gmail.com\",\n  \"password\": \"Test123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff1@happypaws.com\",\n  \"password\": \"Staff123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "item": [
+        {
+          "name": "Get All Pets (FR-9)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Get Pet by ID (FR-12)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search Pets - By Species (FR-10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets/search?species=Dog",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", "search"],
+              "query": [
+                {
+                  "key": "species",
+                  "value": "Dog"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Pets - Multiple Filters (FR-10, FR-11)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets/search?species=Dog&size=Large&shelterLocation=Cebu&gender=Female",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", "search"],
+              "query": [
+                {
+                  "key": "species",
+                  "value": "Dog"
+                },
+                {
+                  "key": "size",
+                  "value": "Large"
+                },
+                {
+                  "key": "shelterLocation",
+                  "value": "Cebu"
+                },
+                {
+                  "key": "gender",
+                  "value": "Female"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Pet (FR-6) [Staff Only]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"species\": \"Dog\",\n  \"breed\": \"Labrador\",\n  \"age\": \"3 years\",\n  \"size\": \"Large\",\n  \"gender\": \"Male\",\n  \"description\": \"Friendly and playful labrador\",\n  \"temperament\": \"Friendly, Energetic, Loyal\",\n  \"photosJson\": \"[\\\"https://example.com/photo1.jpg\\\"]\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pets",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Update Pet (FR-7) [Staff Only]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luna Updated\",\n  \"breed\": \"Golden Retriever Mix\",\n  \"description\": \"Updated friendly dog\",\n  \"temperament\": \"Friendly, Playful, Gentle\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Pet Status (FR-8) [Staff Only]",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Adopted\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pets/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", "1", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adopter Profile",
+      "item": [
+        {
+          "name": "Get My Profile (FR-3)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopters/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["adopters", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update My Profile (FR-3)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profilePersonalInfo\": \"John Doe, 30 years old, Software Engineer\",\n  \"profileResidenceDetails\": \"Own house with fenced yard in Cebu City\",\n  \"profilePetExperience\": \"Had golden retriever for 8 years, experienced with training\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/adopters/me/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["adopters", "me", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit Application (FR-13)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": 1,\n  \"supplementaryAnswers\": \"I have a fenced yard and experience with large dogs. I work from home so the pet will have lots of attention.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"]
+            }
+          }
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Shelter Applications (FR-14) [Staff Only]",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/shelter",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "shelter"]
+            }
+          }
+        },
+        {
+          "name": "Update Application Status (FR-15) [Staff Only]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "1", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shelters",
+      "item": [
+        {
+          "name": "Get All Shelters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shelters",
+              "host": ["{{baseUrl}}"],
+              "path": ["shelters"]
+            }
+          }
+        },
+        {
+          "name": "Update Shelter Profile (FR-5) [Staff Only]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Happy Paws Animal Shelter\",\n  \"location\": \"123 Main Street, Cebu City, Philippines\",\n  \"contactInfo\": \"contact@happypaws.com, +63-917-123-4567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shelters/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["shelters", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-Environment variables and secrets (development)
+ Environment variables and secrets (development)
 
 This file explains how to generate and set secrets for local development.
 

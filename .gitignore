@@ -26,3 +26,8 @@ build/
 # Database
 *.sqlite
 *.db
+
+# Local startup scripts
+start-all.cmd
+start-backend.cmd
+start-web.cmd
