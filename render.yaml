@@ -10,6 +10,8 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: PORT
+        value: 8080
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: happytails-db
