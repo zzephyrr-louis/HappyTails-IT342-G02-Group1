@@ -2,7 +2,7 @@ services:
   # Backend API service
   - type: web
     name: happytails-api
-    env: java
+    runtime: java          # FIXED ✔
     region: singapore
     plan: free
     rootDir: backend
@@ -29,7 +29,7 @@ services:
   # Frontend service
   - type: web
     name: happytails-web
-    env: node
+    runtime: node          # FIXED ✔
     region: singapore
     plan: free
     rootDir: web
