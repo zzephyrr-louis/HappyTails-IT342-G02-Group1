@@ -2,7 +2,8 @@ services:
   # Backend API service
   - type: web
     name: happytails-api
-    runtime: java17
+    env: java
+    region: singapore
     plan: free
     rootDir: backend
     buildCommand: ./mvnw clean package -DskipTests
@@ -22,11 +23,14 @@ services:
         fromDatabase:
           name: happytails-db
           property: password
+      - key: JAVA_VERSION
+        value: "17"
 
   # Frontend service
   - type: web
     name: happytails-web
-    runtime: node
+    env: node
+    region: singapore
     plan: free
     rootDir: web
     buildCommand: npm install && npm run build
@@ -38,4 +42,5 @@ services:
 databases:
   - name: happytails-db
     plan: free
+    region: singapore
     ipAllowList: []
