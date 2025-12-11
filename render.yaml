@@ -2,12 +2,11 @@ services:
   # Backend API service
   - type: web
     name: happytails-api
-    runtime: java          # FIXED ✔
+    env: docker
     region: singapore
     plan: free
     rootDir: backend
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -Dspring.profiles.active=prod -jar target/*.jar
+    dockerfilePath: Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -23,13 +22,11 @@ services:
         fromDatabase:
           name: happytails-db
           property: password
-      - key: JAVA_VERSION
-        value: "17"
 
   # Frontend service
   - type: web
     name: happytails-web
-    runtime: node          # FIXED ✔
+    env: node
     region: singapore
     plan: free
     rootDir: web
