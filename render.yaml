@@ -4,7 +4,7 @@ services:
     name: happytails-api
     env: java
     plan: free
-    buildCommand: cd backend && ./mvnw clean package -DskipTests
+    buildCommand: cd backend && mvnw clean package -DskipTests
     startCommand: cd backend && java -jar target/*.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
@@ -34,7 +34,7 @@ services:
         fromService:
           name: happytails-api
           type: web
-          property: url
+          property: host
 
 databases:
   - name: happytails-db
