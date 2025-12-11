@@ -4,8 +4,8 @@ services:
     name: happytails-api
     env: java
     plan: free
-    buildCommand: cd backend && ./mvnw clean package -DskipTests
-    startCommand: cd backend && java -jar target/*.jar
+    buildCommand: cd backend && mvnw clean package -DskipTests
+    startCommand: cd backend && java -Dspring.profiles.active=prod -jar target/*.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -28,15 +28,13 @@ services:
     env: node
     plan: free
     buildCommand: cd web && npm install && npm run build
-    startCommand: cd web && npm run preview
+    startCommand: cd web && npm run preview -- --host 0.0.0.0 --port $PORT
     envVars:
       - key: VITE_API_URL
-        fromService:
-          name: happytails-api
-          type: web
-          property: url
+        sync: false
+        value: https://happytails-api.onrender.com
 
 databases:
   - name: happytails-db
     plan: free
-    ipAllowList: [] # allow all
+    ipAllowList: []
