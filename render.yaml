@@ -1,0 +1,42 @@
+services:
+  # Backend API service
+  - type: web
+    name: happytails-api
+    env: java
+    plan: free
+    buildCommand: cd backend && ./mvnw clean package -DskipTests
+    startCommand: cd backend && java -jar target/*.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: happytails-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: happytails-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: happytails-db
+          property: password
+
+  # Frontend service
+  - type: web
+    name: happytails-web
+    env: node
+    plan: free
+    buildCommand: cd web && npm install && npm run build
+    startCommand: cd web && npm run preview
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: happytails-api
+          type: web
+          property: url
+
+databases:
+  - name: happytails-db
+    plan: free
+    ipAllowList: [] # allow all
