@@ -2,7 +2,7 @@ services:
   # Backend API service
   - type: web
     name: happytails-api
-    runtime: java
+    runtime: java17
     plan: free
     rootDir: backend
     buildCommand: ./mvnw clean package -DskipTests
