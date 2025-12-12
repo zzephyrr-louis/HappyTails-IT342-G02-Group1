@@ -4,9 +4,9 @@ import axios from 'axios';
 const api = axios.create({
   /**
    * Use a relative /api base in dev; Vite proxies /api to the backend (configured in vite.config.js).
-   * In production change this to the real backend host.
+   * In production, VITE_API_URL env var points to the deployed backend.
    */
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
